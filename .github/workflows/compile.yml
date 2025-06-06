@@ -25,14 +25,8 @@ jobs:
       - name: Compile firmware
         run: esphome compile pi-watchdog2.yaml
 
-      - name: List output folder (debug)
-        run: ls -l .esphome/build/pi-watchdog2/
-
-      - name: Find firmware file
-        run: find . -name firmware.bin
-
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: pi-watchdog2-firmware
-          path: .esphome/build/pi-watchdog2/firmware.bin
+          path: .esphome/build/pi-watchdog2/.pioenvs/pi-watchdog2/firmware.bin
