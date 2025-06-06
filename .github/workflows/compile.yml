@@ -1,22 +1,32 @@
 name: Build ESPHome Firmware
 
 on:
+  workflow_dispatch:
   push:
     paths:
-      - '*.yaml'  # ← reagiert auf jede YAML-Datei im Hauptverzeichnisse
+      - '**.yaml'
 
 jobs:
   build:
-    runs-on: ubuntu-latest #comment
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
       - name: Install ESPHome
         run: pip install esphome
-      - name: Build firmware
+
+      - name: Compile firmware
         run: esphome compile pi-watchdog2.yaml
+
       - name: Upload firmware
         uses: actions/upload-artifact@v3
         with:
-          name: pi-watchdog-firmware
-          path: .pioenvs/pi-watchdog2/firmware.bin
-# kleiner Test-Trigger
+          name: pi-watchdog2-firmware
+          path: pi-watchdog2/.pioenvs/**/firmware.bin
