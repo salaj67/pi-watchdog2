@@ -1,0 +1,21 @@
+name: Build ESPHome Firmware
+
+on:
+  push:
+    paths:
+      - 'pi-watchdog.yaml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install ESPHome
+        run: pip install esphome
+      - name: Build firmware
+        run: esphome compile pi-watchdog.yaml
+      - name: Upload firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: pi-watchdog-firmware
+          path: .pioenvs/pi-watchdog/firmware.bin
