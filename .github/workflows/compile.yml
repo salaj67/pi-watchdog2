@@ -13,7 +13,7 @@ jobs:
       - name: Install ESPHome
         run: pip install esphome
       - name: Build firmware
-        run: esphome compile pi-watchdog.yaml
+        run: esphome compile pi-watchdog2.yaml
       - name: Upload firmware
         uses: actions/upload-artifact@v3
         with:
