@@ -11,6 +11,7 @@ wifi:
   password: "tauruspt92afs"
   fast_connect: true
   power_save_mode: none
+
   ap:
     ssid: "pi-watchdog_fallback"
     password: "12345678"
@@ -21,8 +22,6 @@ web_server:
   port: 80
 
 http_request:
-  useragent: esphome/watchdog
-  timeout: 5s
   verify_ssl: false
 
 output:
@@ -44,18 +43,19 @@ globals:
 
 text_sensor:
   - platform: template
-    name: "Letzter HA-Erfolg"
+    name: "Letzter erfolgreicher HA-Kontakt"
     id: last_ha_success
+    update_interval: never
 
 sensor:
   - platform: template
-    name: "HA Fehlerzähler"
+    name: "Watchdog HA-Fehlerzähler"
     lambda: |-
       return id(ha_failure_count);
     update_interval: 60s
 
   - platform: template
-    name: "Reset-Zähler"
+    name: "Watchdog Reset-Zähler"
     lambda: |-
       return id(reset_counter);
     update_interval: 60s
@@ -65,22 +65,25 @@ interval:
     then:
       - http_request.get:
           url: http://homeassistant.local:8123
-          on_response:
-            then:
-              - lambda: |-
-                  id(ha_failure_count) = 0;
-              - text_sensor.template.publish:
-                  id: last_ha_success
-                  state: !lambda |-
-                    return esphome::current_time->strftime("%Y-%m-%d %H:%M:%S");
+          on_success:
+            - globals.set:
+                id: ha_failure_count
+                value: '0'
+            - text_sensor.template.publish:
+                id: last_ha_success
+                state: !lambda |-
+                  return id(my_time).now().strftime("%Y-%m-%d %H:%M:%S");
           on_error:
-            then:
-              - logger.log: "HA nicht erreichbar – führe Reset aus"
-              - lambda: id(ha_failure_count) += 1;
-              - output.turn_on: gpio_reset
-              - delay: 300ms
-              - output.turn_off: gpio_reset
-              - lambda: id(reset_counter) += 1;
+            - logger.log: "HA nicht erreichbar – führe Reset aus"
+            - lambda: id(ha_failure_count) += 1;
+            - output.turn_on: gpio_reset
+            - delay: 300ms
+            - output.turn_off: gpio_reset
+            - lambda: id(reset_counter) += 1;
+
+time:
+  - platform: sntp
+    id: my_time
 
 api:
 
