@@ -19,3 +19,4 @@ jobs:
         with:
           name: pi-watchdog-firmware
           path: .pioenvs/pi-watchdog2/firmware.bin
+# kleiner Test-Trigger
