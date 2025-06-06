@@ -11,6 +11,7 @@ wifi:
   password: "tauruspt92afs"
   fast_connect: true
   power_save_mode: none
+
   ap:
     ssid: "pi-watchdog_fallback"
     password: "12345678"
@@ -29,16 +30,75 @@ output:
     id: gpio_reset
     inverted: true
 
+globals:
+  - id: ha_failure_count
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: reset_counter
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "ESP IP-Adresse"
+    ssid:
+      name: "Verbunden mit WLAN"
+    bssid:
+      name: "Access Point BSSID"
+  - platform: template
+    name: "Letzter HA Erfolg"
+    id: last_ha_success
+    icon: "mdi:clock"
+
+sensor:
+  - platform: uptime
+    name: "ESP Uptime"
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "WLAN Signalstärke"
+    update_interval: 60s
+
+  - platform: template
+    name: "HA Fehlerzähler"
+    lambda: |-
+      return id(ha_failure_count);
+    update_interval: 30s
+    unit_of_measurement: "x"
+    accuracy_decimals: 0
+
+  - platform: template
+    name: "Reset-Zähler"
+    lambda: |-
+      return id(reset_counter);
+    update_interval: 30s
+    unit_of_measurement: "x"
+    accuracy_decimals: 0
+
 interval:
   - interval: 30s
     then:
       - http_request.get:
           url: http://homeassistant.local:8123
+          on_success:
+            - globals.set:
+                id: ha_failure_count
+                value: '0'
+            - text_sensor.template.publish:
+                id: last_ha_success
+                state: !lambda 'return esphome::current_time->strftime("%Y-%m-%d %H:%M:%S");'
           on_error:
             - logger.log: "HA nicht erreichbar – führe Reset aus"
+            - lambda: |-
+                id(ha_failure_count) += 1;
             - output.turn_on: gpio_reset
             - delay: 300ms
             - output.turn_off: gpio_reset
+            - lambda: |-
+                id(reset_counter) += 1;
 
 api:
 
