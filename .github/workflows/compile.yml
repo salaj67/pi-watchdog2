@@ -28,8 +28,18 @@ jobs:
       - name: List firmware files
         run: ls -l .pioenvs/**/
 
+  - name: Show files in working directory
+    run: ls -la
+
+  - name: Show files in esphome folder
+    run: ls -la
+    working-directory: ./  # Oder falls dein YAML woanders liegt, passe an
+
+- name: Show all .bin files in repo
+  run: find . -name '*.bin'
+
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: pi-watchdog2-firmware
-          path: pi-watchdog2/firmware.bin
+          path: .pioenvs/**/firmware.bin
