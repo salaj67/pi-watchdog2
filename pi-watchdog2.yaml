@@ -1,0 +1,46 @@
+esphome:
+  name: pi-watchdog2
+
+esp32:
+  board: esp32dev
+
+logger:
+
+wifi:
+  ssid: "sizeweb-basis"
+  password: "tauruspt92afs"
+  fast_connect: true
+  power_save_mode: none
+  ap:
+    ssid: "pi-watchdog_fallback"
+    password: "12345678"
+
+captive_portal:
+
+web_server:
+  port: 80
+
+http_request:
+  verify_ssl: false
+
+output:
+  - platform: gpio
+    pin: GPIO14
+    id: gpio_reset
+    inverted: true
+
+interval:
+  - interval: 30s
+    then:
+      - http_request.get:
+          url: http://homeassistant.local:8123
+          on_error:
+            - logger.log: "HA nicht erreichbar – führe Reset aus"
+            - output.turn_on: gpio_reset
+            - delay: 300ms
+            - output.turn_off: gpio_reset
+
+api:
+
+ota:
+  platform: esphome
