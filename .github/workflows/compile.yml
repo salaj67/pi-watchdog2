@@ -25,8 +25,11 @@ jobs:
       - name: Compile firmware
         run: esphome compile pi-watchdog2.yaml
 
+      - name: List firmware files
+        run: ls -l .pioenvs/**/
+
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: pi-watchdog2-firmware
-          path: pi-watchdog2/.pioenvs/**/firmware.bin
+          path: .pioenvs/**/firmware.bin
