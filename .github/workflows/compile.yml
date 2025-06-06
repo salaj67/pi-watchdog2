@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest #comment
     steps:
       - uses: actions/checkout@v3
       - name: Install ESPHome
