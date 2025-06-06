@@ -22,6 +22,8 @@ web_server:
   port: 80
 
 http_request:
+  useragent: esphome/device
+  timeout: 5s
   verify_ssl: false
 
 output:
@@ -65,21 +67,22 @@ interval:
     then:
       - http_request.get:
           url: http://homeassistant.local:8123
-          on_success:
-            - globals.set:
-                id: ha_failure_count
-                value: '0'
-            - text_sensor.template.publish:
-                id: last_ha_success
-                state: !lambda |-
-                  return id(my_time).now().strftime("%Y-%m-%d %H:%M:%S");
+          on_response:
+            then:
+              - globals.set:
+                  id: ha_failure_count
+                  value: '0'
+              - text_sensor.template.publish:
+                  id: last_ha_success
+                  state: !lambda 'return id(my_time).now().strftime("%Y-%m-%d %H:%M:%S");'
           on_error:
-            - logger.log: "HA nicht erreichbar – führe Reset aus"
-            - lambda: id(ha_failure_count) += 1;
-            - output.turn_on: gpio_reset
-            - delay: 300ms
-            - output.turn_off: gpio_reset
-            - lambda: id(reset_counter) += 1;
+            then:
+              - logger.log: "HA nicht erreichbar – führe Reset aus"
+              - lambda: 'id(ha_failure_count) += 1;'
+              - output.turn_on: gpio_reset
+              - delay: 300ms
+              - output.turn_off: gpio_reset
+              - lambda: 'id(reset_counter) += 1;'
 
 time:
   - platform: sntp
