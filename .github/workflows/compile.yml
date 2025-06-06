@@ -3,7 +3,7 @@ name: Build ESPHome Firmware
 on:
   push:
     paths:
-      - 'pi-watchdog.yaml'
+      - '*.yaml'  # ← reagiert auf jede YAML-Datei im Hauptverzeichnis
 
 jobs:
   build:
