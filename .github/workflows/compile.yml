@@ -3,7 +3,7 @@ name: Build ESPHome Firmware
 on:
   push:
     paths:
-      - '*.yaml'  # ← reagiert auf jede YAML-Datei im Hauptverzeichnis
+      - '*.yaml'  # ← reagiert auf jede YAML-Datei im Hauptverzeichnisse
 
 jobs:
   build:
